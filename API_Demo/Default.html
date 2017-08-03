@@ -61,7 +61,7 @@
 			  
 		  // Call Web API to get a list of Products
 		  $.ajax({
-			url: "/crud/api/Product/get" + id + ".json",
+			url: "/api/Product/" + id,
 			type: 'GET',
 			dataType: 'json',
 			success: function (product) {
@@ -78,7 +78,7 @@
 		
 		function productToFields(product) {
 		  $("#productname").val(product.ProductName);
-		  var t = product.IntroductionDate.split(" ");
+		  var t = product.IntroductionDate.split("T");
 		  $("#introdate").val(t[0]);
 		  $("#url").val(product.Url);
 		}		
