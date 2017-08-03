@@ -8,9 +8,55 @@
 </head>
 <body>
 	<script>
+        var Product = {
+            ProductId: 0,
+            ProductName: "",
+            IntroductionDate: "",
+            Url: ""
+        }
 		// Handle click event on Update button
-		function updateClick() {
-		}
+        function updateClick() {
+            // Build product object from inputs
+            Product = new Object();
+            Product.ProductName = $("#productname").val();
+            Product.IntroductionDate =
+                $("#introdate").val();
+            Product.Url = $("#url").val();
+            if ($("#updateButton").text().trim() == "Add") {
+                productAdd(Product);
+            }
+        }
+
+        function productAdd(product) {
+            $.ajax({
+                url: "/api/Product",
+                type: 'POST',
+                contentType:
+                   "application/json;charset=utf-8",
+                data: JSON.stringify(Product),
+                success: function (product) {
+                    productAddSuccess(product);
+                },
+                error: function (request, message, error) {
+                    handleException(request, message, error);
+                }
+            });
+        }
+
+        function productAddSuccess(product) {
+            productAddRow(product);
+            formClear();
+        }
+
+        function formClear() {
+            $("#productname").val("");
+            $("#introdate").val("");
+            $("#url").val("");
+        }
+
+        function addClick() {
+            formClear();
+        }
 		// Handle click event on Add button
 		function addClick() {
 		}
