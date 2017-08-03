@@ -21,14 +21,12 @@
 		function productList() {
 		  // Call Web API to get a list of Product
 		  $.ajax({
-			url: '/crud/api/Product/get.json',
+			url: '/api/Product',
 			type: 'GET',
 			dataType: 'json',
 			success: function (products) {
-				setTimeout(function(){
-					$('#loading').hide();
-					productListSuccess(products);
-				}, 1000);
+				$('#loading').hide();
+				productListSuccess(products);
 			},
 			error: function (request, message, error) {
 			  handleException(request, message, error);
