@@ -11,5 +11,6 @@ namespace API_Demo.Models
         public string ProductName { get; set; }
         public DateTime IntroductionDate { get; set; }
         public string Url { get; set; }
+        public int Sale { get; set; }
     }
 }

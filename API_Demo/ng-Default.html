@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>CRUD Example</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+    <script type="text/javascript" src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>
+</head>
+<body>
+    <div class="container" ng-app="myApp" ng-controller="myController">
+        <div class="row">
+            <div class="col-sm-6">
+                <h2>Paul’s Training Company</h2>
+            </div>
+        </div>
+        <!-- end row -->
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="form-control">
+                        <input type="checkbox" ng-model="viewWeek" />
+                        View week report
+                    </label>
+                    <button type="button" class="btn btn-primary" ng-click="viewReport()">
+                        View report
+                    </button>
+                </div>
+                <table id="productTable" class="table table-bordered table-condensed table-striped">
+                    <thead>
+                        <tr>
+                            <th>Edit</th>
+                            <th>Product Name</th>
+                            <th>Introduction Date</th>
+                            <th>URL</th>
+                            <th>Sale</th>
+                        </tr>
+                        <tr id="loading" ng-show="loading">
+                            <td colspan="100%" align="center"><img src="giphy.gif"></td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="x in myData">
+                            <td><button type='button' class='btn btn-default' ng-click='productGet(x.ProductId)'><span class='glyphicon glyphicon-edit'></span></button></td>
+                            <td>{{x.ProductName}}</td>
+                            <td>{{x.IntroductionDate}}</td>
+                            <td>{{x.Url}}</td>
+                            <td>{{x.Sale}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="chartContainer" style="height: 300px; width: 100%;"></div>
+
+        <!-- end row -->
+        <div class="row">
+            <div class="col-sm-6">
+                <button type="button" id="addButton" class="btn btn-primary" onclick="addClick();">
+                    Add Product
+                </button>
+            </div>
+        </div>
+        <!-- end row -->
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        Product Information
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <label for="productname">Product Name</label>
+                            <input type="text" ng-model="product.ProductName"
+                                   class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="introdate">
+                                Introduction Date
+                            </label>
+                            <input type="date" ng-model="product.IntroductionDate"
+                                   class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="url">URL</label>
+                            <input type="url" ng-model="product.Url"
+                                   class="form-control" />
+                        </div>
+                        <input type="hidden" ng-model="product.ProductId" />
+
+                    </div>
+                    <div class="panel-footer">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <button type="button" id="updateButton"
+                                        class="btn btn-primary"
+                                        ng-click="updateClick()">
+                                    {{addUpdate}}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var app = angular.module('myApp', []);
+        app.controller('myController', function ($scope, $http) {
+            $scope.loading = true;
+            $scope.addUpdate = 'Add';
+            $scope.viewReport = function () {
+                var url = 'api/Product';
+                if ($scope.viewWeek)
+                    url = 'api/Product?viewWeek=1';
+                $http.get(url).then(function (response) {
+                    $scope.myData = response.data;
+                    $scope.loading = false;
+                    var options = {
+                        title: { text: "Product Sales" },
+                        animationEnabled: true,
+                        data: [
+                        {
+                            type: "column", //change it to line, area, bar, pie, etc
+                            dataPoints: []
+                        }
+                        ]
+                    };
+
+                    $scope.myData.forEach(function (item) {
+                        options.data[0].dataPoints.push({ y: item.Sale, label: 'Book ' + item.ProductId })
+                    });
+                    $("#chartContainer").CanvasJSChart(options);
+                });
+            }
+
+            $scope.viewReport();
+
+            $scope.updateClick = function () {
+                $scope.loading = true;
+                if ($scope.addUpdate == 'Add') {
+                    $http.post('api/Product', $scope.product).then(function (response) {
+                        $scope.loading = false;
+                        $scope.myData.push(response.data);
+                    });
+                }
+                else {
+                    $http.put('api/Product', $scope.product).then(function (response) {
+                        $scope.loading = false;
+                        var i = $scope.myData.findIndex(data => data.ProductId == $scope.product.ProductId);
+                        $scope.myData.splice(i, 0, $scope.product);
+                        $scope.product = new Object();
+                        $scope.addUpdate = 'Add';
+                    });
+                }
+            };
+
+            $scope.productGet = function (id) {
+                $http.get('api/Product/' + id).then(function (response) {
+                    $scope.product = response.data;
+                    //date = response.data.IntroductionDate.split("T")[0];
+                    $scope.product.IntroductionDate = new Date(response.data.IntroductionDate);
+                    $scope.addUpdate = 'Update';
+                });
+            };
+        });
+    </script>
+</body>
+</html>

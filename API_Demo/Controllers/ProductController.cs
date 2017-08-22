@@ -10,12 +10,40 @@ namespace API_Demo.Controllers
 {
     public class ProductController : ApiController
     {
+        [HttpPut()]
+        public IHttpActionResult Put(Product product)
+        {
+            IHttpActionResult ret = null;
+            if (Update(product))
+            {
+                ret = Ok(product);
+            }
+            else
+            {
+                ret = NotFound();
+            }
+            return ret;
+        }
+
+        private bool Update(Product product)
+        {
+            return true;
+        }
+
         [HttpGet()]
         public IHttpActionResult Get()
         {
             IHttpActionResult ret = null;
             List<Product> list = new List<Product>();
             list = CreateMockData();
+            var q = Request.GetQueryNameValuePairs().SingleOrDefault(n => n.Key == "viewWeek");
+            if (q.Value == "1")
+            {
+                list[0].Sale = 100;
+                list[1].Sale = 115;
+                list[2].Sale = 150;
+            }
+
             if (list.Count > 0)
             {
                 ret = Ok(list);
@@ -85,7 +113,8 @@ namespace API_Demo.Controllers
                 ProductId = 1,
                 ProductName = "Extending Bootstrap with CSS, JavaScript and jQuery",
                 IntroductionDate = Convert.ToDateTime("6/11/2015"),
-                Url = "http://bit.ly/1SNzc0i"
+                Url = "http://bit.ly/1SNzc0i", 
+                Sale = 5
             });
 
             ret.Add(new Product()
@@ -93,7 +122,8 @@ namespace API_Demo.Controllers
                 ProductId = 2,
                 ProductName = "Build your own Bootstrap Business Application Template in MVC",
                 IntroductionDate = Convert.ToDateTime("1/29/2015"),
-                Url = "http://bit.ly/1I8ZqZg"
+                Url = "http://bit.ly/1I8ZqZg",
+                Sale = 10
             });
 
             ret.Add(new Product()
@@ -101,7 +131,8 @@ namespace API_Demo.Controllers
                 ProductId = 3,
                 ProductName = "Building Mobile Web Sites Using Web Forms, Bootstrap, and HTML5",
                 IntroductionDate = Convert.ToDateTime("8/28/2014"),
-                Url = "http://bit.ly/1J2dcrj"
+                Url = "http://bit.ly/1J2dcrj",
+                Sale = 15
             });
 
             return ret;
